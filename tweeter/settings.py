@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG')
+DEBUG = os.environ.get('DJANGO_DEBUG').lower() == "true"
 
 ALLOWED_HOSTS = ["django-tweet-tool.herokuapp.com",
                  "*.local", "localhost"]
@@ -83,6 +83,12 @@ DATABASES = {
             'CLIENT': {
                 'host': os.environ.get('MONGODB_HOST_STRING')
             }
+            # 'ENGINE': 'django.db.backends.postgresql',
+            # 'NAME': os.environ.get('POSTGRES_DB'),
+            # 'USER': os.environ.get('POSTGRES_USER'),
+            # 'HOST': os.environ.get('POSTGRES_HOST'),
+            # 'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+            # 'PORT': 5432
         }
 }
 
