@@ -19,7 +19,7 @@ var tweetGenerator = Vue.createApp({
   },
   computed: {
     url(){
-      return `http://localhost:3456/airtable/{{ config_id }}/json?targetView=${this.targetView}&tweetView=${this.tweetView}&tweets=${this.maxTweets}`
+      return `https://django-tweet-tool.herokuapp.com/airtable/{{ config_id }}/json?targetView=${this.targetView}&tweetView=${this.tweetView}&tweets=${this.maxTweets}`
     }
   },
   methods: {
