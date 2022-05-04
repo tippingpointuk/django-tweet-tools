@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="https://unpkg.com/vue@3"></script>
+    {% load static %}
+  </head>
+  <body>
+
+    <div id=app>
+      <form id="form">
+        <label for="targetView">Target Airtable View</label>
+        <input v-model="targetView" type="text" id="targetView">
+        <br>
+        <label for="tweetView">Tweet Airtable View</label>
+        <input  v-model="tweetView" type="text" id="tweetView">
+        <br>
+        <label for="tweets">How many tweets?</label>
+        <input  v-model="maxTweets" type="number" id="tweets">
+      </form>
+      <pre class="embed">
+        {% filter force_escape %}
+<link rel="stylesheet" href="https://django-tweet-tool.herokuapp.com{% static 'airtable_generator/css/tweets.css' %}">
+<script src="https://unpkg.com/vue@3"></script>
+<div id="tweet-generator" >
+  <div class="tweet-generator-button" data-test="testing">
+    <button @click=getTweets type="button" name="generateTweets">Generate Tweets!</button>
+    <img v-if="loading" src="https://django-tweet-tool.herokuapp.com{% static 'airtable_generator/loading.svg' %}" class="hide mp-tweet-generator-loading"/>
+  </div>
+  <div>
+    <div v-for="tweet of tweets" v-html="tweet.html">
+    </div>
+  </div>
+</div>
+<script src="https://django-tweet-tool.herokuapp.com/airtable/{{ config_id }}/embed.js?targetView={% verbatim %}{{ targetView }}&tweetView={{ tweetView }}&tweets={{ maxTweets }}{% endverbatim %}" charset="utf-8"></script>
+        {% endfilter  %}
+      </pre>
+
+    </div>
+  </body>
+  <script type="text/javascript">
+    var app = Vue.createApp({
+      data() {
+        return {
+          tweetView: "",
+          targetView: "",
+          maxTweets: 4,
+        }
+      }
+    }).mount('#app')
+  </script>
+</html>

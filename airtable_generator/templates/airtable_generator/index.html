@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'airtable_generator/css/tweets.css' %}">
+    <meta charset="utf-8">
+    <title>Tweet Generator</title>
+    <style media="screen">
+      main {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      {% for tweet in tweets %}
+        {{ tweet.html }}
+      {% endfor %}
+    </main>
+  </body>
+</html>

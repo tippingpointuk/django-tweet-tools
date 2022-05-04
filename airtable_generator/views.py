@@ -1,6 +1,9 @@
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-from django.utils.encoding import iri_to_uri
+from django.shortcuts import get_object_or_404, render
+from django.http import JsonResponse, HttpResponse
+# from django.utils.encoding import iri_to_uri
+from urllib.parse import quote
+from django.utils.safestring import mark_safe
+from django.template.loader import render_to_string
 from airtable import airtable
 from os import environ
 import random
@@ -10,7 +13,50 @@ import json
 from .models import Config
 
 
-def get_tweets(request, config_id):
+def embed(request, config_id):
+    # config = get_object_or_404(Config, pk=config_id)
+    context = {'config_id': config_id}
+    print(context)
+    return render(request, 'airtable_generator/embed.html', context)
+
+
+def embed2(request, config_id):
+    # config = get_object_or_404(Config, pk=config_id)
+    context = {
+        'targetView': request.POST.get('targetView') or request.GET.get('targetView') or request.POST.get('mpView') or request.GET.get('mpView'),
+        'tweetView': request.POST.get('tweetView') or request.GET.get('tweetView'),
+        'maxTweets': int(request.POST.get('tweets')
+                         or request.GET.get('tweets') or 4),
+        'config_id': config_id
+    }
+    print(context)
+    return render(request, 'airtable_generator/embed2.html', context)
+
+
+def embed_js(request, config_id):
+    # config = get_object_or_404(Config, pk=config_id)
+    context = {
+        'targetView': request.POST.get('targetView') or request.GET.get('targetView') or request.POST.get('mpView') or request.GET.get('mpView'),
+        'tweetView': request.POST.get('tweetView') or request.GET.get('tweetView'),
+        'maxTweets': int(request.POST.get('tweets')
+                         or request.GET.get('tweets') or 4),
+        'config_id': config_id
+    }
+    javascript = render_to_string('airtable_generator/embed.js', context)
+    return HttpResponse(javascript, content_type='application/javascript')
+
+
+def html(request, config_id):
+    context = get_tweet_data(request, config_id)
+    return render(request, 'airtable_generator/index.html', context)
+
+
+def json_view(request, config_id):
+    tweets = get_tweet_data(request, config_id)
+    return JsonResponse(tweets)
+
+
+def get_tweet_data(request, config_id):
     view = {
         'target': request.POST.get('targetView') or request.GET.get('targetView') or request.POST.get('mpView') or request.GET.get('mpView'),
         'tweets': request.POST.get('tweetView') or request.GET.get('tweetView')
@@ -19,7 +65,6 @@ def get_tweets(request, config_id):
                      or request.GET.get('tweets') or 4)
     # Get config
     config = get_object_or_404(Config, pk=config_id)
-
     # Get targets
     target_at = airtable.Airtable(
         config.target_base, environ.get(config.api_key_name))
@@ -50,7 +95,7 @@ def get_tweets(request, config_id):
         }
         result['html'] = tweet_to_html(result)
         results['tweets'].append(result)
-    return JsonResponse(results)
+    return results
 
 
 def tweet_to_html(tweet):
@@ -63,18 +108,18 @@ def tweet_to_html(tweet):
     html = f"""
         <div
             class=tweet onclick="sendOutreach(this)"
-            data-tweet="{ iri_to_uri(json.dumps(tweet['target'])) }">
+            data-tweet="{ quote(json.dumps(tweet['target'])) }">
           <a target="_blank" href="{ create_ctt(tweet['tweet']) }">
             { inner_html }
           </a>
         </div>
         """
-    return html
+    return mark_safe(html)
 
 
 def create_ctt(tweet, url=''):
-    url = "https://twitter.com/intent/tweet"
-    return f"{url}?text={ iri_to_uri(tweet) }&url={ iri_to_uri(url) }"
+    base_url = "https://twitter.com/intent/tweet"
+    return f"{base_url}?text={ quote(tweet) }&url={ quote(url) }"
 
 
 def process_word(word):
@@ -90,4 +135,6 @@ def process_word(word):
     if span_class:
         return f'<span class="{span_class}">{word}</span>'
     else:
+        return word
+
         return word

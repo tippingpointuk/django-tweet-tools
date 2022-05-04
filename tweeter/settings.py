@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ["django-tweet-tool.herokuapp.com",
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'airtable_generator',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -138,4 +140,10 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-STATIC_ROOT = "./static"
+STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+
+CORS_ALLOWED_ORIGINS = [
+    "https://django-tweet-tool.herokuapp.com",
+    "http://localhost:3456"
+]
+CORS_ALLOW_METHODS = ['GET']
