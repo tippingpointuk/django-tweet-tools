@@ -28,7 +28,7 @@ def get_tweets(request, config_id):
     print('Getting targer')
     for r in target_at.iterate(config.target_table, view=view['target']):
         targets.append(r['fields'])
-        print("got one"")
+        print("got one")
 
     # Get tweets
     tweets_at = airtable.Airtable(
