@@ -17,26 +17,26 @@ def get_tweets(request, config_id):
     }
     max_tweets = int(request.POST.get('tweets')
                      or request.GET.get('tweets') or 4)
-    print(view)
     # Get config
     config = get_object_or_404(Config, pk=config_id)
 
     # Get targets
     target_at = airtable.Airtable(
         config.target_base, environ.get(config.api_key_name))
-    targets = []
-    print('Getting targer')
-    for r in target_at.iterate(config.target_table, view=view['target']):
-        targets.append(r['fields'])
-        print("got one")
-
+    target_table = target_at.iterate(config.target_table, view=view['target'])
+    targets = [r['fields']
+               for r in target_table if 'Twitter' in r['fields'].keys()]
     # Get tweets
     tweets_at = airtable.Airtable(
         config.tweets_base, environ.get(config.api_key_name))
     tweet_table = tweets_at.iterate(config.tweets_table, view=view['tweets'])
     tweets = [{'tweet': r['fields']['Text']} for r in tweet_table]
+    # Randomise tweets
     random.shuffle(tweets)
+
     results = {'tweets': []}
+
+    # Pick up to max number of tweets and process with random target
     for tweet in tweets[0:max_tweets]:
         target = targets[random.randrange(0, len(targets)-1)]
         target_filtered = {
@@ -61,7 +61,9 @@ def tweet_to_html(tweet):
         words.append('<br>')
     inner_html = ' '.join(words)
     html = f"""
-        <div class=tweet onclick="sendOutreach(this)"  data-tweet="{ iri_to_uri(json.dumps(tweet['target'])) }">
+        <div
+            class=tweet onclick="sendOutreach(this)"
+            data-tweet="{ iri_to_uri(json.dumps(tweet['target'])) }">
           <a target="_blank" href="{ create_ctt(tweet['tweet']) }">
             { inner_html }
           </a>
