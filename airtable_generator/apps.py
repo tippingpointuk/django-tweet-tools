@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class AirtableConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'airtable'
+    name = 'airtable_generator'
