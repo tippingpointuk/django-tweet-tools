@@ -25,8 +25,10 @@ def get_tweets(request, config_id):
     target_at = airtable.Airtable(
         config.target_base, environ.get(config.api_key_name))
     targets = []
+    print('Getting targer')
     for r in target_at.iterate(config.target_table, view=view['target']):
         targets.append(r['fields'])
+        print("got one"")
 
     # Get tweets
     tweets_at = airtable.Airtable(
