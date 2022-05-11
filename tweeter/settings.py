@@ -145,6 +145,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
 CORS_ALLOWED_ORIGINS = [
     "https://django-tweet-tool.herokuapp.com",
-    "http://localhost:3456"
+    "http://localhost:3456",
+    "https://www.stopcambo.org.uk",
+    "https://stopcambo.org.uk"
 ]
 CORS_ALLOW_METHODS = ['GET']
