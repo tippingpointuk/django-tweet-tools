@@ -137,7 +137,7 @@ def tweet_sent(request, config_id):
     # Get config
     config = get_object_or_404(Config, pk=config_id)
     email = request.GET.get('email_address') or "None"
-    opt_in = bool(request.GET.get('opt_in'))
+    opt_in = request.GET.get('opt_in')
     target = request.GET.get('target')
     tweet = request.GET.get('tweet')
     # Send outreach to action network
@@ -146,8 +146,11 @@ def tweet_sent(request, config_id):
     }
     if environ.get(config.action_network_api_key_name):
         headers['OSDI_API_Token'] = environ[config.action_network_api_key_name]
-    if not opt_in or not email:
+    print(opt_in)
+    print(request.GET.get('opt_in'))
+    if opt_in != 'true' or not email:
         email = "anonymous"
+    print(email)
     body = {
       "targets": [
         {
@@ -160,8 +163,8 @@ def tweet_sent(request, config_id):
       },
       "message": tweet
     }
-    url = config.action_network_advocacy_campaign+"/outreaches"
-    res = requests.post(url, data=json.dumps(body), headers=headers)
-    if 200 <= res.status_code < 299:
-        print(res.json())
+    # url = config.action_network_advocacy_campaign+"/outreaches"
+    # res = requests.post(url, data=json.dumps(body), headers=headers)
+    # if 200 <= res.status_code < 299:
+    #     print(res.json())
     return HttpResponse("Tweet recorded")
