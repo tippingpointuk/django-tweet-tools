@@ -24,6 +24,9 @@
 .tweet > a:visited{
   /* font-size: 12px; */
 }
+.tweet-link {
+  text-decoration: none;
+}
 
 .mp-tweet-generator-button button{
   display: inline-block;

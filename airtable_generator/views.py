@@ -9,6 +9,7 @@ from os import environ
 import random
 from liquid import Template
 import json
+import requests
 
 from .models import Config
 
@@ -27,7 +28,8 @@ def embed2(request, config_id):
         'tweetView': request.POST.get('tweetView') or request.GET.get('tweetView'),
         'maxTweets': int(request.POST.get('tweets')
                          or request.GET.get('tweets') or 4),
-        'config_id': config_id
+        'config_id': config_id,
+        'base_url': request.POST.get('baseUrl') or request.GET.get('baseUrl') or 'https://django-tweet-tool.herokuapp.com'
     }
     print(context)
     return render(request, 'airtable_generator/embed2.html', context)
@@ -40,7 +42,8 @@ def embed_js(request, config_id):
         'tweetView': request.POST.get('tweetView') or request.GET.get('tweetView'),
         'maxTweets': int(request.POST.get('tweets')
                          or request.GET.get('tweets') or 4),
-        'config_id': config_id
+        'config_id': config_id,
+        'base_url': request.POST.get('baseUrl') or request.GET.get('baseUrl') or 'https://django-tweet-tool.herokuapp.com'
     }
     javascript = render_to_string('airtable_generator/embed.js', context)
     return HttpResponse(javascript, content_type='application/javascript')
@@ -93,6 +96,7 @@ def get_tweet_data(request, config_id):
             'tweet': tweet_template.render(target=target_filtered),
             'target': target_filtered
         }
+        result['ctt'] = create_ctt(result['tweet'])
         result['html'] = tweet_to_html(result)
         results['tweets'].append(result)
     return results
@@ -105,16 +109,7 @@ def tweet_to_html(tweet):
             words.append(process_word(word))
         words.append('<br>')
     inner_html = ' '.join(words)
-    html = f"""
-        <div
-            class=tweet onclick="sendOutreach(this)"
-            data-tweet="{ quote(json.dumps(tweet['target'])) }">
-          <a target="_blank" href="{ create_ctt(tweet['tweet']) }">
-            { inner_html }
-          </a>
-        </div>
-        """
-    return mark_safe(html)
+    return mark_safe(inner_html)
 
 
 def create_ctt(tweet, url=''):
@@ -137,4 +132,36 @@ def process_word(word):
     else:
         return word
 
-        return word
+
+def tweet_sent(request, config_id):
+    # Get config
+    config = get_object_or_404(Config, pk=config_id)
+    email = request.GET.get('email_address') or "None"
+    opt_in = bool(request.GET.get('opt_in'))
+    target = request.GET.get('target')
+    tweet = request.GET.get('tweet')
+    # Send outreach to action network
+    headers = {
+        'content-type': 'application/json'
+    }
+    if environ.get(config.action_network_api_key_name):
+        headers['OSDI_API_Token'] = environ[config.action_network_api_key_name]
+    if not opt_in or not email:
+        email = "anonymous"
+    body = {
+      "targets": [
+        {
+          "given_name": target,
+          "family_name": ""
+        }
+      ],
+      "person": {
+        "email_addresses": [{"address": email}],
+      },
+      "message": tweet
+    }
+    url = config.action_network_advocacy_campaign+"/outreaches"
+    res = requests.post(url, data=json.dumps(body), headers=headers)
+    if 200 <= res.status_code < 299:
+        print(res.json())
+    return HttpResponse("Tweet recorded")

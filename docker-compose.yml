@@ -21,6 +21,7 @@ services:
       - DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY
       - DJANGO_DEBUG=$DJANGO_DEBUG
       - AIRTABLE_API_KEY=$AIRTABLE_API_KEY
+      - AN_API_KEY=$AN_API_KEY
       # - POSTGRES_DB=postgres
       # - POSTGRES_USER=postgres
       # - POSTGRES_PASSWORD=postgres

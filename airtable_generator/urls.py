@@ -10,4 +10,6 @@ urlpatterns = [
     path('<int:config_id>/embed2', views.embed2, name='embed2'),
     path('<int:config_id>/embed.js', views.embed_js, name='embed_js'),
     path('<int:config_id>', views.html, name='html'),
+    path('<int:config_id>/tweeted', views.tweet_sent, name='tweeted'),
+
 ]

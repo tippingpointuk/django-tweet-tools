@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 
 class Config(models.Model):
     name = models.CharField(max_length=100)
@@ -13,6 +11,11 @@ class Config(models.Model):
     tweets_table = models.CharField(max_length=50)
     # API key name
     api_key_name = models.CharField(max_length=100, default="AIRTABLE_API_KEY")
+    # Advocacy Campaign & action network info
+    action_network_api_key_name = models.CharField(
+        max_length=100, default="AN_API_KEY", null=True)
+    action_network_advocacy_campaign = models.CharField(
+        max_length=200, null=True)
 
     def __str__(self):
         return self.name

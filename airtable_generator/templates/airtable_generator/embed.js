@@ -14,12 +14,15 @@ var tweetGenerator = Vue.createApp({
       targetView: "{{ targetView }}",
       maxTweets: {{ maxTweets }},
       tweets: [],
-      loading: false
+      loading: false,
+      baseUrl: "{{ base_url }}/airtable/{{ config_id }}",
+      email: "",
+      optIn: false
     }
   },
   computed: {
     url(){
-      return `https://django-tweet-tool.herokuapp.com/airtable/{{ config_id }}/json?targetView=${this.targetView}&tweetView=${this.tweetView}&tweets=${this.maxTweets}`
+      return `${this.baseUrl}/json?targetView=${this.targetView}&tweetView=${this.tweetView}&tweets=${this.maxTweets}`
     }
   },
   methods: {
@@ -27,6 +30,12 @@ var tweetGenerator = Vue.createApp({
       httpGetAsync(this.url, function(res){
         tweets = JSON.parse(res)['tweets'];
         tweetGenerator.tweets = tweets;
+      })
+    },
+    tweetClicked(tweet){
+      httpGetAsync(`${this.baseUrl}/tweeted?email_address=${encodeURIComponent(this.email)}&opt_in=${encodeURIComponent(this.optIn)}&target=${encodeURIComponent(tweet.target.name)}&tweet=${encodeURIComponent(tweet.tweet)}`, function(res){
+        console.log(res)
+        return;
       })
     }
   }

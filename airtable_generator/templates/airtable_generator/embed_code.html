@@ -1,0 +1,21 @@
+{% load static %}
+<link rel="stylesheet" href="{{ base_url }}{% static 'airtable_generator/css/tweets.css' %}">
+<script src="https://unpkg.com/vue@3"></script>
+<div id="tweet-generator" >
+  <div class="tweet-generator-button" data-test="testing">
+    <input type="email" name="email_address" v-model="email"><br>
+    <input type="checkbox" name="opt_in" id="opt_in" v-model="optIn">
+    <label for="opt_in">I consent to emails from Stop Cambo</label><br>
+    <button @click=getTweets type="button" name="generateTweets">Generate Tweets!</button>
+    <img v-if="loading" src="{{ base_url }}{% static 'airtable_generator/loading.svg' %}" class="hide mp-tweet-generator-loading"/>
+  </div>
+  <div>
+    <div v-for="tweet of tweets" @click="tweetClicked(tweet)" :tweet="tweet">
+      <a :href="tweet.ctt" target="_blank" class="tweet-link">
+        <div class="tweet" v-html=tweet.html>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+<script src="{{ base_url }}/airtable/{{ config_id }}/embed.js?targetView={{ targetView }}&tweetView={{ tweetView }}&tweets={{ maxTweets }}&baseUrl={{ base_url }}" charset="utf-8"></script>

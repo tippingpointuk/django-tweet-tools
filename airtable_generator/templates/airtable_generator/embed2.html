@@ -1,31 +1,6 @@
-{% load static %}
 <pre>
   {% filter force_escape %}
-  <link rel="stylesheet" href="https://django-tweet-tool.herokuapp.com{% static 'airtable_generator/css/tweets.css' %}">
-  <script src="https://unpkg.com/vue@3"></script>
-  <div id="tweet-generator" >
-    <div class="tweet-generator-button" data-test="testing">
-      <button @click=getTweets type="button" name="generateTweets">Generate Tweets!</button>
-      <img v-if="loading" src="{% static 'airtable_generator/loading.svg' %}" class="hide mp-tweet-generator-loading"/>
-    </div>
-    <div>
-      <div v-for="tweet of tweets" v-html="tweet.html">
-      </div>
-    </div>
-  </div>
-  <script src="https://django-tweet-tool.herokuapp.com/airtable/{{ config_id }}/embed.js?targetView={{ targetView }}&tweetView={{ tweetView }}&tweets={{ maxTweets }}" charset="utf-8"></script>
-{% endfilter %}
+    {% include "./embed_code.html" %}
+  {% endfilter %}
 </pre>
-<link rel="stylesheet" href="{% static 'airtable_generator/css/tweets.css' %}">
-<script src="https://unpkg.com/vue@3"></script>
-<div id="tweet-generator" >
-  <div class="tweet-generator-button" data-test="testing">
-    <button @click=getTweets type="button" name="generateTweets">Generate Tweets!</button>
-    <img v-if="loading" src="{% static 'airtable_generator/loading.svg' %}" class="hide mp-tweet-generator-loading"/>
-  </div>
-  <div>
-    <div v-for="tweet of tweets" v-html="tweet.html">
-    </div>
-  </div>
-</div>
-<script src="/airtable/{{ config_id }}/embed.js?targetView={{ targetView }}&tweetView={{ tweetView }}&tweets={{ maxTweets }}" charset="utf-8"></script>
+{% include "./embed_code.html" %}
