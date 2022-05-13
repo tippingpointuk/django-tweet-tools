@@ -163,8 +163,8 @@ def tweet_sent(request, config_id):
       },
       "message": tweet
     }
-    # url = config.action_network_advocacy_campaign+"/outreaches"
-    # res = requests.post(url, data=json.dumps(body), headers=headers)
-    # if 200 <= res.status_code < 299:
-    #     print(res.json())
+    url = config.action_network_advocacy_campaign+"/outreaches"
+    res = requests.post(url, data=json.dumps(body), headers=headers)
+    if 200 <= res.status_code < 299:
+        print(res.json())
     return HttpResponse("Tweet recorded")
