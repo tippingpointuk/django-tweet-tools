@@ -15,9 +15,11 @@
   <body>
     <main>
       {% for tweet in tweets %}
-      <div class="tweet">
-        {{ tweet.html }}
-      </div>
+      <a href="{{tweet.ctt}}" target="_blank" class="tweet-link">
+        <div class="tweet">
+          {{ tweet.html }}
+        </div>
+      </a>
       {% endfor %}
     </main>
   </body>
