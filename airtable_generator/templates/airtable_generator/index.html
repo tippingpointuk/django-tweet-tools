@@ -15,7 +15,9 @@
   <body>
     <main>
       {% for tweet in tweets %}
+      <div class="tweet">
         {{ tweet.html }}
+      </div>
       {% endfor %}
     </main>
   </body>
