@@ -14,6 +14,10 @@ import requests
 from .models import Config
 
 
+def req_prop(request, prop):
+    return request.POST.get(prop) or request.GET.get(prop)
+
+
 def embed(request, config_id):
     # config = get_object_or_404(Config, pk=config_id)
     context = {'config_id': config_id}
@@ -24,14 +28,24 @@ def embed(request, config_id):
 def embed2(request, config_id):
     # config = get_object_or_404(Config, pk=config_id)
     context = {
-        'targetView': request.POST.get('targetView') or request.GET.get('targetView') or request.POST.get('mpView') or request.GET.get('mpView'),
-        'tweetView': request.POST.get('tweetView') or request.GET.get('tweetView'),
+        'targetView': str(request.POST.get('targetView')
+                          or request.GET.get('targetView')
+                          or request.POST.get('mpView')
+                          or request.GET.get('mpView')),
+        'tweetView': str(request.POST.get('tweetView')
+                         or request.GET.get('tweetView')),
         'maxTweets': int(request.POST.get('tweets')
                          or request.GET.get('tweets') or 4),
-        'config_id': config_id,
-        'base_url': request.POST.get('baseUrl') or request.GET.get('baseUrl') or 'https://django-tweet-tool.herokuapp.com'
+        'config_id': int(config_id),
+        'base_url': str(request.POST.get('baseUrl')
+                        or request.GET.get('baseUrl')
+                        or 'https://django-tweet-tool.herokuapp.com'),
+        'button_class': str(request.POST.get('buttonClass')
+                            or request.GET.get('buttonClass')).replace(",", " "),
+        'gather_emails': str(request.POST.get('gatherEmails')
+                             or request.GET.get('gatherEmails')).lower() in ['true', '1'],
+        'consent_text': str(req_prop(request, 'consentText'))
     }
-    print(context)
     return render(request, 'airtable_generator/embed2.html', context)
 
 
@@ -134,6 +148,7 @@ def process_word(word):
 
 
 def tweet_sent(request, config_id):
+    # print(request.COOKIES['sessionid'])
     # Get config
     config = get_object_or_404(Config, pk=config_id)
     email = request.GET.get('email_address') or "None"
@@ -145,11 +160,12 @@ def tweet_sent(request, config_id):
         'content-type': 'application/json'
     }
     if environ.get(config.action_network_api_key_name):
-        headers['OSDI_API_Token'] = environ[config.action_network_api_key_name]
+        headers['OSDI-API-Token'] = environ[config.action_network_api_key_name]
     print(opt_in)
     print(request.GET.get('opt_in'))
     if opt_in != 'true' or not email:
-        email = "anonymous"
+        email = request.headers.get(
+            'X-Request-ID') or "anonymous"
     print(email)
     body = {
       "targets": [
@@ -166,5 +182,11 @@ def tweet_sent(request, config_id):
     url = config.action_network_advocacy_campaign+"/outreaches"
     res = requests.post(url, data=json.dumps(body), headers=headers)
     if 200 <= res.status_code < 299:
-        print(res.json())
+        data = res.json()
+    else:
+        return HttpResponse("Error in recording tweet")
+    print(data)
+    if opt_in != 'true':
+        # Unsubscribe person
+        person_url = data['_links']['osdi:person']['href']
     return HttpResponse("Tweet recorded")
