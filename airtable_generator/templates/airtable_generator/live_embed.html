@@ -1,0 +1,25 @@
+
+<script type="text/javascript">
+  function httpGetAsync(theUrl, callback) {
+    let xmlHttpReq = new XMLHttpRequest();
+    xmlHttpReq.onreadystatechange = function () {
+      if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200)
+        callback(xmlHttpReq.responseText);
+    }
+    xmlHttpReq.open("GET", theUrl, true); // true for asynchronous
+    xmlHttpReq.send(null);
+  }
+  function getTweetsSent() {
+    httpGetAsync("{{ base_url }}/airtable/{{ config_id }}/tweets_sent", function(res) {
+      data = JSON.parse(res);
+      document.getElementById('tweetsSent').innerHTML = data['tweets_sent'];
+    })
+  }
+  setInterval(getTweetsSent, 10000)
+</script>
+<div id="tweetsSent">
+
+</div>
+<script type="text/javascript">
+  getTweetsSent()
+</script>

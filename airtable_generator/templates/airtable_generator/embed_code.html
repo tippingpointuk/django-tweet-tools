@@ -2,16 +2,13 @@
 {% load markdownify %}
 <link rel="stylesheet" href="{{ base_url }}{% static 'airtable_generator/css/tweets.css' %}">
 <script src="https://unpkg.com/vue@3"></script>
-<div id="tweet-generator" >
+<div id="tweet-generator" >{% if static_tweets != 'true' %}
   <div class="tweet-generator-button" data-test="testing">
-    {% if gather_emails %}
-    <input type="email" name="email_address" v-model="email"><br>
+    {% if gather_emails %}<input type="email" name="email_address" v-model="email"><br>
     <input type="checkbox" name="opt_in" id="opt_in" v-model="optIn">
-    <label for="opt_in">{{ consent_text | markdownify }}</label><br>
-    {% endif %}
+    <label for="opt_in">{{ consent_text | markdownify }}</label><br>{% endif %}
     <button @click=getTweets type="button" name="generateTweets" class="{{ button_class }}">Generate Tweets!</button>
-    <img v-if="loading" src="{{ base_url }}{% static 'airtable_generator/loading.svg' %}" class="hide mp-tweet-generator-loading"/>
-  </div>
+  </div>{% endif %}
   <div>
     <div v-for="tweet of tweets" @click="tweetClicked(tweet)" :tweet="tweet">
       <a :href="tweet.ctt" target="_blank" class="tweet-link">
@@ -21,4 +18,4 @@
     </div>
   </div>
 </div>
-<script src="{{ base_url }}/airtable/{{ config_id }}/embed.js?targetView={{ targetView }}&tweetView={{ tweetView }}&tweets={{ maxTweets }}&baseUrl={{ base_url }}" charset="utf-8"></script>
+<script src="{{ base_url }}/airtable/{{ config_id }}/embed.js?targetView={{ targetView }}&tweetView={{ tweetView }}&tweets={{ maxTweets }}&baseUrl={{ base_url }}&preload={{ static_tweets }}" charset="utf-8"></script>

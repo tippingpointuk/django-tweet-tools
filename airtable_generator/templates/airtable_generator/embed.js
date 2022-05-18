@@ -25,6 +25,11 @@ var tweetGenerator = Vue.createApp({
       return `${this.baseUrl}/json?targetView=${this.targetView}&tweetView=${this.tweetView}&tweets=${this.maxTweets}`
     }
   },
+  {% if preload == 'true' %}
+  mounted() {
+    this.getTweets()
+  },
+  {% endif %}
   methods: {
     getTweets() {
       httpGetAsync(this.url, function(res){

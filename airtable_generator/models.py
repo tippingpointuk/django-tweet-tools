@@ -19,3 +19,13 @@ class Config(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# class TweetClicked(models.Model):
+#     tweet = models.CharField(max_length=350)
+#     target_name = models.CharField(max_length=100, null=True)
+#     target_twitter = models.CharField(max_length=100, null=True)
+#     config = models.ForeignKey('Config')
+#
+#     def __str__(self):
+#         return self.tweet

@@ -44,7 +44,8 @@ def embed2(request, config_id):
                             or request.GET.get('buttonClass')).replace(",", " "),
         'gather_emails': str(request.POST.get('gatherEmails')
                              or request.GET.get('gatherEmails')).lower() in ['true', '1'],
-        'consent_text': str(req_prop(request, 'consentText'))
+        'consent_text': str(req_prop(request, 'consentText')),
+        'static_tweets': req_prop(request, 'staticTweets')
     }
     return render(request, 'airtable_generator/embed2.html', context)
 
@@ -57,7 +58,8 @@ def embed_js(request, config_id):
         'maxTweets': int(request.POST.get('tweets')
                          or request.GET.get('tweets') or 4),
         'config_id': config_id,
-        'base_url': request.POST.get('baseUrl') or request.GET.get('baseUrl') or 'https://django-tweet-tool.herokuapp.com'
+        'base_url': request.POST.get('baseUrl') or request.GET.get('baseUrl') or 'https://django-tweet-tool.herokuapp.com',
+        'preload': req_prop(request, 'preload')
     }
     javascript = render_to_string('airtable_generator/embed.js', context)
     return HttpResponse(javascript, content_type='application/javascript')
@@ -100,7 +102,12 @@ def get_tweet_data(request, config_id):
 
     # Pick up to max number of tweets and process with random target
     for tweet in tweets[0:max_tweets]:
-        target = targets[random.randrange(0, len(targets)-1)]
+        if len(targets) > 1:
+            target = targets[random.randrange(0, len(targets)-1)]
+        elif len(targets) == 1:
+            target = targets[0]
+        else:
+            target = {'Name': '', 'Twitter': ''}
         target_filtered = {
             'name': target['Name'],
             'twitter': target['Twitter']
@@ -190,3 +197,28 @@ def tweet_sent(request, config_id):
         # Unsubscribe person
         person_url = data['_links']['osdi:person']['href']
     return HttpResponse("Tweet recorded")
+
+
+def get_tweets_sent(request, config_id):
+    config = get_object_or_404(Config, pk=config_id)
+    headers = {
+        'content-type': 'application/json'
+    }
+    if environ.get(config.action_network_api_key_name):
+        headers['OSDI-API-Token'] = environ[config.action_network_api_key_name]
+    url = config.action_network_advocacy_campaign+"/outreaches"
+    res = requests.get(url, headers=headers)
+    if 200 <= res.status_code < 299:
+        ac = res.json()
+        if 'total_records' in ac.keys():
+            return JsonResponse({'tweets_sent': ac['total_records']})
+    return JsonResponse({'error': 'could not retrive info', 'tweets_sent': ''})
+
+
+def live(request, config_id):
+    context = {
+        'config_id': config_id,
+        'base_url': (req_prop(request, 'baseUrl')
+                     or "https://django-tweet-tool.herokuapp.com")
+    }
+    return render(request, 'airtable_generator/live.html', context)
