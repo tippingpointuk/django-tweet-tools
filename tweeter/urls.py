@@ -18,5 +18,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('airtable/', include('airtable_generator.urls'))
+    path('airtable/', include('airtable_generator.urls')),
+    path('anac/', include('an_ac_stats.urls'))
 ]

@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'markdownify.apps.MarkdownifyConfig'
+    'markdownify.apps.MarkdownifyConfig',
+    'an_ac_stats'
 ]
 
 MIDDLEWARE = [
