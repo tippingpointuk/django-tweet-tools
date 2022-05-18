@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponse
 # from django.utils.encoding import iri_to_uri
 from urllib.parse import quote
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from django.template.loader import render_to_string
 from airtable import airtable
 from os import environ
@@ -10,6 +11,7 @@ import random
 from liquid import Template
 import json
 import requests
+import datetime
 
 from .models import Config
 
@@ -201,6 +203,18 @@ def tweet_sent(request, config_id):
 
 def get_tweets_sent(request, config_id):
     config = get_object_or_404(Config, pk=config_id)
+    updated = config.action_network_advocacy_campaign_records_last_updated
+    if updated:
+        since_update = timezone.now() - updated
+        if since_update.seconds > 15:
+            update_tweets_sent(request, config)
+    else:
+        update_tweets_sent(request, config)
+    return JsonResponse({'tweets_sent': config.action_network_advocacy_campaign_records})
+
+
+def update_tweets_sent(request, config):
+    print('updating from action network')
     headers = {
         'content-type': 'application/json'
     }
@@ -208,11 +222,14 @@ def get_tweets_sent(request, config_id):
         headers['OSDI-API-Token'] = environ[config.action_network_api_key_name]
     url = config.action_network_advocacy_campaign+"/outreaches"
     res = requests.get(url, headers=headers)
-    if 200 <= res.status_code < 299:
-        ac = res.json()
-        if 'total_records' in ac.keys():
-            return JsonResponse({'tweets_sent': ac['total_records']})
-    return JsonResponse({'error': 'could not retrive info', 'tweets_sent': ''})
+    if 200 > res.status_code > 299:
+        return
+    ac = res.json()
+    if 'total_records' not in ac.keys():
+        pass
+    config.action_network_advocacy_campaign_records = ac['total_records']
+    config.action_network_advocacy_campaign_records_last_updated = timezone.now()
+    config.save()
 
 
 def live(request, config_id):

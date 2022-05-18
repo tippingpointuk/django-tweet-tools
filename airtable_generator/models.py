@@ -16,6 +16,9 @@ class Config(models.Model):
         max_length=100, default="AN_API_KEY", null=True)
     action_network_advocacy_campaign = models.CharField(
         max_length=200, null=True)
+    action_network_advocacy_campaign_records = models.IntegerField(null=True)
+    action_network_advocacy_campaign_records_last_updated = models.DateTimeField(
+        null=True)
 
     def __str__(self):
         return self.name
