@@ -1,6 +1,10 @@
 {% load static %}
 {% load markdownify %}
+{% if theme == "dark" %}
 <link rel="stylesheet" href="{{ base_url }}{% static 'airtable_generator/css/tweets.css' %}">
+{% else %}
+<link rel="stylesheet" href="{{ base_url }}{% static 'airtable_generator/css/tweets_light.css' %}">
+{% endif %}
 <script src="https://unpkg.com/vue@3"></script>
 <div id="tweet-generator" >{% if static_tweets != 'true' %}
   <div class="tweet-generator-button" data-test="testing">

@@ -28,7 +28,6 @@ def embed(request, config_id):
 
 
 def embed2(request, config_id):
-    # config = get_object_or_404(Config, pk=config_id)
     context = {
         'targetView': str(request.POST.get('targetView')
                           or request.GET.get('targetView')
@@ -39,15 +38,14 @@ def embed2(request, config_id):
         'maxTweets': int(request.POST.get('tweets')
                          or request.GET.get('tweets') or 4),
         'config_id': int(config_id),
-        'base_url': str(request.POST.get('baseUrl')
-                        or request.GET.get('baseUrl')
-                        or 'https://django-tweet-tool.herokuapp.com'),
+        'base_url': "http://" + request.META['HTTP_HOST'],
         'button_class': str(request.POST.get('buttonClass')
                             or request.GET.get('buttonClass')).replace(",", " "),
         'gather_emails': str(request.POST.get('gatherEmails')
                              or request.GET.get('gatherEmails')).lower() in ['true', '1'],
         'consent_text': str(req_prop(request, 'consentText')),
-        'static_tweets': req_prop(request, 'staticTweets')
+        'static_tweets': req_prop(request, 'staticTweets'),
+        'theme': req_prop(request, 'theme')
     }
     return render(request, 'airtable_generator/embed2.html', context)
 
