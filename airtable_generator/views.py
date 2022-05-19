@@ -38,7 +38,7 @@ def embed2(request, config_id):
         'maxTweets': int(request.POST.get('tweets')
                          or request.GET.get('tweets') or 4),
         'config_id': int(config_id),
-        'base_url': "http://" + request.META['HTTP_HOST'],
+        'base_url': f"{request.scheme}://{request.META['HTTP_HOST']}",
         'button_class': str(request.POST.get('buttonClass')
                             or request.GET.get('buttonClass')).replace(",", " "),
         'gather_emails': str(request.POST.get('gatherEmails')
