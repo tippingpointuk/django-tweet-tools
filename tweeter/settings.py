@@ -149,6 +149,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://django-tweet-tool.herokuapp.com",
     "http://localhost:3456",
     "https://www.stopcambo.org.uk",
-    "https://stopcambo.org.uk"
+    "https://stopcambo.org.uk",
+    "https://stopcambo.webflow.io"
 ]
 CORS_ALLOW_METHODS = ['GET']
