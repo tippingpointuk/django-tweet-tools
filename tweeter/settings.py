@@ -145,6 +145,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOWED_ORIGINS = [
     "https://django-tweet-tool.herokuapp.com",
     "http://localhost:3456",
@@ -152,4 +154,4 @@ CORS_ALLOWED_ORIGINS = [
     "https://stopcambo.org.uk",
     "https://stopcambo.webflow.io"
 ]
-CORS_ALLOW_METHODS = ['GET']
+CORS_ALLOW_METHODS = ['GET', 'POST']
