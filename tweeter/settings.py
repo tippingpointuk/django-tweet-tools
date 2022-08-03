@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'markdownify.apps.MarkdownifyConfig',
-    'an_ac_stats'
+    'an_ac_stats',
+    'event_map'
 ]
 
 MIDDLEWARE = [

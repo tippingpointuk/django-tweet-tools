@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+{% load static %}
+  <head>
+    <meta charset="utf-8">
+    <title>{{ event.title }}</title>
+    <link rel="stylesheet" href="{% static 'event_map/css/MarkerCluster.Default.css' %}">
+    <link rel="stylesheet" href="{% static 'event_map/css/MarkerCluster.css' %}">
+    <link rel="stylesheet" href="{% static 'event_map/css/map.css' %}">
+    <link rel="stylesheet" href="{% static 'event_map/css/content.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="">
+    <script type="text/javascript" src="{% static 'event_map/js/jquery.js' %}"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <script src="{% static 'event_map/js/leaflet.markercluster-src.js' %}"></script>
+  </head>
+  <body>
+    <div class="Chaos-Map-Container">
+      <div id="Chaos-Map"></div>
+      <div class="Chaos-Map-Overlay">
+        <!-- <div class="Action">
+
+        </div> -->
+        <!-- <div class="Postcode-Form Chaos-Form">
+          <input id="Postcode-Form-Input" type="text" name="post_code" value="" placeholder="Post Code">
+        </div> -->
+        <div class="Action-List">
+        </div>
+      </div>
+    </div>
+    <script src="/map/{{ map_id }}.js?{{ request.META.QUERY_STRING }}"></script>
+  </body>
+</html>

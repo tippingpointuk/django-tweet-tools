@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <pre>
+      {% filter force_escape %}
+        {% include "./embed_code.html" %}
+      {% endfilter %}
+    </pre>
+    {% include "./embed_code.html" %}
+  </body>
+</html>
