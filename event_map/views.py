@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.utils import timezone
 from django.core.exceptions import FieldError
+from django.views.decorators.clickjacking import xframe_options_exempt
 import pyairtable
 import os
 import requests
@@ -21,9 +22,8 @@ ALL_FIELDS = ["title", "description", "summary", "browser_url",
 existing_fields = [f.name for f in Event._meta.get_fields()]
 AVAILABLE_FIELDS = [f for f in ALL_FIELDS if f in existing_fields]
 
-# print(Event._meta)
 
-
+@xframe_options_exempt
 def html_map(request, map_id):
     print(map_id)
     return render(request, "event_map/map.html", context={"map_id": map_id})
