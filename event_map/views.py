@@ -76,11 +76,19 @@ def js_map(request, map_id):
 
 def refresh_map(request, map_uuid):
     map = get_object_or_404(EventMap, uuid=map_uuid)
+    airtable = 0
+    an = 0
     for airtable_sync in map.airtable_syncs.all():
-        refresh_airtable(request, airtable_sync.uuid, map)
+        airtable += refresh_airtable(request, airtable_sync.uuid, map)
     for action_network_ec_sync in map.action_network_ec_syncs.all():
-        refresh_action_network_ec(request, action_network_ec_sync.uuid, map)
-    return render(request, "event_map/refresh.html", context={"name": map.name})
+        an += refresh_action_network_ec(request,
+                                        action_network_ec_sync.uuid, map)
+    context = {
+        "name": map.name,
+        "airtable_events": airtable,
+        "an_events": an
+    }
+    return render(request, "event_map/refresh.html", context=context)
 
 
 def refresh_airtable(request, airtable_uuid, event_map=None):
@@ -128,6 +136,7 @@ def refresh_airtable(request, airtable_uuid, event_map=None):
                 db_event.event_maps.add(event_map)
 
             db_event.save()
+    return len(airtable_events)
 
 
 def refresh_action_network_ec(request, uuid, event_map=None):
@@ -180,7 +189,7 @@ def refresh_action_network_ec(request, uuid, event_map=None):
             if len(db_event.event_maps.filter(id=event_map.id)) == 0:
                 db_event.event_maps.add(event_map)
             db_event.save()
-    return render(request, "event_map/refresh.html", context={"name": sync.name})
+    return len(events)
 
 
 def get_an_ec(api_key, endpoint, last_synced):
@@ -190,7 +199,7 @@ def get_an_ec(api_key, endpoint, last_synced):
     }
     ls_date = f"{last_synced.year}-{last_synced.month}-{last_synced.day}"
     params = {
-        "filter": f"modified_date gt {ls_date}",
+        "filter": f"modified_date gt '{ls_date}'",
         "page": 1
     }
     url = endpoint+"events"
