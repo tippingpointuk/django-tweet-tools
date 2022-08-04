@@ -1,0 +1,28 @@
+<button onclick="madeCall()">Made call</button>
+<script type="text/javascript">
+  function httpPostAsync(theUrl, data, callback) {
+    let xmlHttpReq = new XMLHttpRequest();
+    xmlHttpReq.onreadystatechange = function () {
+      if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200)
+        callback(xmlHttpReq.responseText);
+    }
+    xmlHttpReq.open("POST", theUrl, true); // true for asynchronous
+    // set `Content-Type` header
+    xmlHttpReq.setRequestHeader('Content-Type', 'application/json');
+    xmlHttpReq.send(JSON.stringify(data));
+  }
+  function madeCall(){
+    console.log("button pressed")
+    data = {
+      "targets": [
+        {"given_name": "BEIS Department"}
+      ],
+      "person": {
+        "email_addresses": [ { "address": "anonymous" } ]
+      }
+    }
+    httpPostAsync('https://actionnetwork.org/api/v2/advocacy_campaigns/4d2a84bb-2f08-4038-b27f-7ba80e98eb50/outreaches', data, function(res){
+      console.log(res)
+    })
+  }
+</script>

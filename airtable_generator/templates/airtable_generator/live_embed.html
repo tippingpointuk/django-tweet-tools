@@ -1,5 +1,9 @@
+<div class="tweetsSent">
 
+</div>
 <script type="text/javascript">
+  let tweetsSent;
+  let newTweets;
   function httpGetAsync(theUrl, callback) {
     let xmlHttpReq = new XMLHttpRequest();
     xmlHttpReq.onreadystatechange = function () {
@@ -12,14 +16,15 @@
   function getTweetsSent() {
     httpGetAsync("{{ base_url }}/airtable/{{ config_id }}/tweets_sent", function(res) {
       data = JSON.parse(res);
-      document.getElementById('tweetsSent').innerHTML = data['tweets_sent'];
+      newTweets = data['tweets_sent'] - tweetsSent;
+      updateSlowly = setInterval;
     })
   }
-  setInterval(getTweetsSent, 10000)
-</script>
-<div id="tweetsSent">
-
-</div>
-<script type="text/javascript">
+  function updateTweetNumber(){
+    tweetCounters = document.getElementByClass('tweetsSent');
+    tweetCounters.forEach((counterElement, i) => {
+      counterElement.innerHTML = tweetsSent
+    });
+  }
   getTweetsSent()
 </script>
