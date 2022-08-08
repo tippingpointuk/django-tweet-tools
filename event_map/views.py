@@ -111,7 +111,7 @@ def refresh_airtable(request, airtable_uuid, event_map=None):
         event = airtable_event["fields"]
         print(f"Event: {event.get(airtable_sync.field_title)}")
         db_events = Event.objects.filter(airtable_id=airtable_event['id']
-                                        ).filter(airtable_sync=airtable_sync)
+                                         ).filter(airtable_sync=airtable_sync)
         if len(db_events) == 0:
             db_event = Event()
         else:
@@ -141,7 +141,11 @@ def refresh_airtable(request, airtable_uuid, event_map=None):
 
 def refresh_action_network_ec(request, uuid, event_map=None):
     sync = get_object_or_404(ActionNetworkECSync, uuid=uuid)
-    last_synced = sync.last_synced
+    if request.GET.get("all"):
+        print("getting all action network events")
+        last_synced = None
+    else:
+        last_synced = sync.last_synced
     sync.last_synced = timezone.now()
     sync.save()
     api_key = os.environ.get(sync.api_key) or sync.api_key
@@ -189,6 +193,8 @@ def refresh_action_network_ec(request, uuid, event_map=None):
             if len(db_event.event_maps.filter(id=event_map.id)) == 0:
                 db_event.event_maps.add(event_map)
             db_event.save()
+    if request.GET.get("all") and event_map:
+        cleanup_old_an_events(event_map, events)
     return len(events)
 
 
@@ -197,14 +203,11 @@ def get_an_ec(api_key, endpoint, last_synced):
         "Content-Type": "application/json",
         "OSDI-API-Token": api_key
     }
-    ls_date = f"{last_synced.year}-{last_synced.month}-{last_synced.day}"
-    params = {
-        "filter": f"modified_date gt '{ls_date}'",
-        "page": 1
-    }
+    params = {"page": 1}
+    if last_synced:
+        ls_date = f"{last_synced.year}-{last_synced.month}-{last_synced.day}"
+        params["filter"] = f"modified_date gt '{ls_date}'"
     url = endpoint+"events"
-    print(url)
-    print(params)
     events = []
     new_events = [None]
     while len(new_events) > 0:
@@ -219,3 +222,16 @@ def get_an_ec(api_key, endpoint, last_synced):
         params["page"] += 1
     print(f"Got {len(events)} events from Action Network")
     return events
+
+
+def cleanup_old_an_events(map, events):
+    print("cleaning up deteted events")
+    map_events = Event.objects.filter(event_maps__id=map.id)
+    removed = 0
+    for event in map_events:
+        match = [e for e in events if e['_links']["self"]["href"] == event.action_network_api]
+        if len(match) > 0:
+            continue
+        event.event_maps.remove(map)
+        removed += 1
+    return removed
