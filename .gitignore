@@ -1,3 +1,4 @@
 .venv
+.envold
 .env
 __pycache__
