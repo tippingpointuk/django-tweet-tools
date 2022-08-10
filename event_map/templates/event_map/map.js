@@ -66,8 +66,7 @@ function makeMap(actions) {
     action = actions[i]
     startDate = new Date(action["start_date"])
     // var markerLocation = action;
-    if (action['map_exclude']){
-      console.log(`No location for ${action['title']}`)
+    if (action['map_exclude'] || action['online']){
       continue
     }
     var newMarker = L.marker([action["latitude"], action["longitude"]],{icon: redMarker});

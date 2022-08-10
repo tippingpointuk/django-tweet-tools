@@ -4,6 +4,7 @@ from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.utils import timezone
 from django.core.exceptions import FieldError
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.db.models import Q
 import pyairtable
 import os
 import requests
@@ -17,7 +18,7 @@ ALL_FIELDS = ["title", "description", "summary", "browser_url",
               "start_date", "end_date", "all_day_date",
               "all_day", "capacity", "guests_can_invite_others",
               "transparence", "visibility", "timezone_identifier", "latitude",
-              "longitude", "address", "online"
+              "longitude", "address", "online", "modified_date"
               ]
 existing_fields = [f.name for f in Event._meta.get_fields()]
 AVAILABLE_FIELDS = [f for f in ALL_FIELDS if f in existing_fields]
@@ -53,15 +54,24 @@ def json_map(request, map_id):
         print(field.to_python(filters_input[key]))
         filters[key] = field.to_python(filters_input[key])
     print(filters)
-    events = Event.objects.filter(event_maps__id=map.id, visibility="public")
-    if "future" in q.keys():
-        events = events.filter(start_date__gte=datetime.date.today())
-    try:
-        events_filtered = events.filter(**filters)
-    except FieldError as err:
-        return HttpResponseBadRequest(err)
-    return JsonResponse(list(events_filtered.values(*AVAILABLE_FIELDS, "id")),
-                        safe=False)
+    events_lists = [
+        Event.objects.filter(
+            visibility="public", airtable_sync__in=map.airtable_syncs.all()),
+        Event.objects.filter(
+            visibility="public",
+            action_network_ec_sync__in=map.action_network_ec_syncs.all())
+    ]
+    events = []
+    for event_q in events_lists:
+        if "past" not in q.keys():
+            event_q = event_q.filter(start_date__gte=datetime.date.today())
+        try:
+            events_filtered = event_q.filter(**filters)
+        except FieldError as err:
+            return HttpResponseBadRequest(err)
+        events.extend(list(events_filtered.values(*AVAILABLE_FIELDS, "id")))
+
+    return JsonResponse(events, safe=False)
 
 
 def js_map(request, map_id):

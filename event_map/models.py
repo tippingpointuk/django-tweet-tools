@@ -20,6 +20,8 @@ class Event(models.Model):
     browser_url = models.CharField(max_length=200)
     visibility = models.CharField(max_length=200)
     summary = models.CharField(max_length=1000, null=True)
+    status = models.CharField(max_length=200, null=True)
+    modified_date = models.DateTimeField(default=timezone.now)
 
     # Extra fields
     online = models.BooleanField(default=False)
