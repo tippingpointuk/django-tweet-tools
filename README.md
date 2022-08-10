@@ -24,7 +24,7 @@ AN_API_KEY=alongapikey # https://actionnetwork.org/groups/<yourgroup>/apis
 
 To start the container just run:
 
-sh```
+```sh
 docker-compose up
 ```
 
