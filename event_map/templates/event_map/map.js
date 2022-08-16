@@ -130,7 +130,6 @@ function updateActionsList(actions){
               <h3><a target="_blank" href="${action["browser_url"]}">${ action["title"] }</a></h3>
               <a target="_blank" href="${action["browser_url"]}"><span class="Chaos-Button">Join</span></a>
             </div>
-            ${action["start_date"]}
             <p><time>${ startTime  }</time> on ${ startDate }</p>
             <address>${action['address'] }</address>
           </div>
