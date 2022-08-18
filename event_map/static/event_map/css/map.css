@@ -48,6 +48,11 @@
 		 flex-basis: auto;
 	}
 }
+@media screen and (max-width: 450px) {
+	.Chaos-Map-Container .Chaos-Map-Overlay{
+		display: none;
+	}
+}
  #map {
 	 height: 80vh;
 	 width: 100%;
