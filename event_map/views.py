@@ -56,9 +56,10 @@ def json_map(request, map_id):
     print(filters)
     events_lists = [
         Event.objects.filter(
-            visibility="public", airtable_sync__in=map.airtable_syncs.all()),
+            visibility="public", status="confirmed",
+            airtable_sync__in=map.airtable_syncs.all()),
         Event.objects.filter(
-            visibility="public",
+            visibility="public", status="confirmed",
             action_network_ec_sync__in=map.action_network_ec_syncs.all())
     ]
     events = []
@@ -172,7 +173,10 @@ def refresh_action_network_ec(request, uuid, event_map=None):
         else:
             db_event = db_events[0]
         for field in ALL_FIELDS:
-            setattr(db_event, field, event.get(field))
+            value = event.get(field)
+            # if field.includes('_date'):
+            #     value = event.get(field)
+            setattr(db_event, field, value)
 
         db_event.action_network_ec_sync = sync
         db_event.action_network_api = event_api
