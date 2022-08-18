@@ -1,0 +1,30 @@
+<button onclick="madeCall(endpoint='{{ campaign.campaign_url }}/outreaches')">Made call</button>
+<script type="text/javascript">
+  function httpPostAsync(theUrl, data, callback) {
+    let xmlHttpReq = new XMLHttpRequest();
+    xmlHttpReq.onreadystatechange = function () {
+      if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200)
+        callback(xmlHttpReq.responseText);
+    }
+    xmlHttpReq.open("POST", theUrl, true); // true for asynchronous
+    // set `Content-Type` header
+    xmlHttpReq.setRequestHeader('Content-Type', 'application/json');
+    xmlHttpReq.send(JSON.stringify(data));
+  }
+  function madeCall(endpoint,
+                    target='{% if request.GET.target %}{{request.GET.target}}{% else %}BEIS Department{% endif %}',
+                    email='anonymous'){
+    console.log("button pressed")
+    data = {
+      "targets": [
+        {"given_name": target}
+      ],
+      "person": {
+        "email_addresses": [ { "address": email} ]
+      }
+    }
+    httpPostAsync(endpoint, data, function(res){
+      console.log(res)
+    })
+  }
+</script>

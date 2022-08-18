@@ -85,11 +85,16 @@ def get_tweet_data(request, config_id):
     # Get config
     config = get_object_or_404(Config, pk=config_id)
     # Get targets
-    target_at = airtable.Airtable(
-        config.target_base, environ.get(config.api_key_name))
-    target_table = target_at.iterate(config.target_table, view=view['target'])
-    targets = [r['fields']
-               for r in target_table if 'Twitter' in r['fields'].keys()]
+    if view['target']:
+        target_at = airtable.Airtable(
+            config.target_base, environ.get(config.api_key_name))
+        target_table = target_at.iterate(
+            config.target_table, view=view['target'])
+        targets = [r['fields']
+                   for r in target_table if 'Twitter' in r['fields'].keys()]
+    else:
+        targets = json.loads(request.POST.get('targets')
+                             or request.GET.get('targets'))
     # Get tweets
     tweets_at = airtable.Airtable(
         config.tweets_base, environ.get(config.api_key_name))
@@ -168,12 +173,9 @@ def tweet_sent(request, config_id):
     }
     if environ.get(config.action_network_api_key_name):
         headers['OSDI-API-Token'] = environ[config.action_network_api_key_name]
-    print(opt_in)
-    print(request.GET.get('opt_in'))
     if opt_in != 'true' or not email:
         email = request.headers.get(
             'X-Request-ID') or "anonymous"
-    print(email)
     body = {
       "targets": [
         {
@@ -223,9 +225,13 @@ def update_tweets_sent(request, config):
     if 200 > res.status_code > 299:
         return
     ac = res.json()
-    if 'total_records' not in ac.keys():
+    if 'total_records' in ac.keys():
+        records = ac['total_records']
+    elif 'total_outreaches' in ac.keys():
+        records = ac['total_outreaches']
+    else:
         pass
-    config.action_network_advocacy_campaign_records = ac['total_records']
+    config.action_network_advocacy_campaign_records = records
     config.action_network_advocacy_campaign_records_last_updated = timezone.now()
     config.save()
 
