@@ -35,4 +35,6 @@ def update_records(campaign):
 
 
 def outreach_button(request, campaign_id):
-    return render(request, "an_ac_stats/button.html")
+    campaign = get_object_or_404(Campaign, pk=campaign_id)
+    context = {'request': request, 'campaign': campaign, 'test': 'TESTING'}
+    return render(request, "an_ac_stats/button.html", context=context)
