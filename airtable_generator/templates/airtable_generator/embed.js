@@ -44,4 +44,4 @@ var tweetGenerator = Vue.createApp({
       })
     }
   }
-}).mount('#tweet-generator')
+}).mount("tweet-generator")
