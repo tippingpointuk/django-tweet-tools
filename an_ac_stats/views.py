@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
 from django.utils import timezone
 
@@ -32,3 +32,9 @@ def update_records(campaign):
     campaign.total_records = ac['total_records']
     campaign.last_updated = timezone.now()
     campaign.save()
+
+
+def outreach_button(request, campaign_id):
+    campaign = get_object_or_404(Campaign, pk=campaign_id)
+    context = {'request': request, 'campaign': campaign, 'test': 'TESTING'}
+    return render(request, "an_ac_stats/button.html", context=context)
