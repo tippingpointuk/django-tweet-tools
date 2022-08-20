@@ -71,7 +71,7 @@ def json_map(request, map_id):
         except FieldError as err:
             return HttpResponseBadRequest(err)
         events.extend(list(events_filtered.values(*AVAILABLE_FIELDS, "id")))
-
+    events.sort(key=lambda x: x['start_date'])
     return JsonResponse(events, safe=False)
 
 
@@ -88,12 +88,18 @@ def js_map(request, map_id):
 def refresh_map(request, map_uuid):
     map = get_object_or_404(EventMap, uuid=map_uuid)
     airtable = 0
-    an = 0
+    an = {
+        'removed': 0,
+        'updated': 0,
+        'new': 0
+    }
     for airtable_sync in map.airtable_syncs.all():
         airtable += refresh_airtable(request, airtable_sync.uuid, map)
     for action_network_ec_sync in map.action_network_ec_syncs.all():
-        an += refresh_action_network_ec(request,
-                                        action_network_ec_sync.uuid, map)
+        an_sync_data =  refresh_action_network_ec(request,
+                                                  action_network_ec_sync.uuid, map)
+        for k in an.keys():
+            an[k] += an_sync_data[k]
     context = {
         "name": map.name,
         "airtable_events": airtable,
@@ -152,6 +158,11 @@ def refresh_airtable(request, airtable_uuid, event_map=None):
 
 def refresh_action_network_ec(request, uuid, event_map=None):
     sync = get_object_or_404(ActionNetworkECSync, uuid=uuid)
+    output = {
+        'removed': 0,
+        'updated': 0,
+        'new': 0
+    }
     if request.GET.get("all"):
         print("getting all action network events")
         last_synced = None
@@ -167,11 +178,13 @@ def refresh_action_network_ec(request, uuid, event_map=None):
         # try to get exsting event in events database
         event_api = event['_links']["self"]["href"]
         db_events = Event.objects.filter(action_network_api=event_api
-                                         ).filter(action_network_ec_sync=sync)
+                                         ).filter(action_network_ec_sync__id=sync.id)
         if len(db_events) == 0:
             db_event = Event()
+            output['new'] += 1
         else:
             db_event = db_events[0]
+            output['updated'] += 1
         for field in ALL_FIELDS:
             value = event.get(field)
             # if field.includes('_date'):
@@ -207,9 +220,11 @@ def refresh_action_network_ec(request, uuid, event_map=None):
             if len(db_event.event_maps.filter(id=event_map.id)) == 0:
                 db_event.event_maps.add(event_map)
             db_event.save()
-    if request.GET.get("all") and event_map:
-        cleanup_old_an_events(event_map, events)
-    return len(events)
+    # if request.GET.get("all") and event_map:
+    #     output['removed'] = cleanup_old_an_events(event_map, events)
+    if request.GET.get("all") == 'true':
+        output['removed'] = cleanup_old_an_ec_events(sync, events)
+    return output
 
 
 def get_an_ec(api_key, endpoint, last_synced):
@@ -247,5 +262,20 @@ def cleanup_old_an_events(map, events):
         if len(match) > 0:
             continue
         event.event_maps.remove(map)
+        removed += 1
+    return removed
+
+
+def cleanup_old_an_ec_events(sync, events):
+    print('removing evnets')
+    sync_events = Event.objects.filter(action_network_ec_sync__id=sync.id)
+    removed = 0
+    for event in sync_events:
+        match = [e for e in events if e['_links']["self"]["href"] == event.action_network_api]
+        if len(match) > 0:
+            continue
+        print(f'Removing: {event}, {event.id}')
+        event.action_network_ec_sync = None
+        event.save()
         removed += 1
     return removed
