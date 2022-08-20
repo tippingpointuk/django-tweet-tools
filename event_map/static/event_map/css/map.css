@@ -49,8 +49,14 @@
 	}
 }
 @media screen and (max-width: 450px) {
-	.Chaos-Map-Container .Chaos-Map-Overlay{
+	
+}
+@media screen and ((max-height: 600px) or (max-width: 450px)) {
+	.Chaos-Map-Container .Chaos-Map-Overlay .header-line > a {
 		display: none;
+	}	
+	.Chaos-Map-Container .Chaos-Map-Overlay .Chaos-Blog-Item .top .description {
+		font-size: 0.6em;
 	}
 }
  #map {
