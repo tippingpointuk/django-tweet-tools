@@ -1,7 +1,7 @@
 .Chaos-Map-Container {
 	 display: flex;
 }
- .Chaos-Map-Container #Chaos-Map {
+ .Chaos-Map-Container > .Chaos-Map {
 	 position: absolute;
 	 width: 100vw;
 	 height: 100vh;

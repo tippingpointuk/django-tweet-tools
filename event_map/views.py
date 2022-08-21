@@ -26,15 +26,17 @@ AVAILABLE_FIELDS = [f for f in ALL_FIELDS if f in existing_fields]
 
 @xframe_options_exempt
 def html_map(request, map_id):
-    print(map_id)
+    # Embedable HTML map of events
     return render(request, "event_map/map.html", context={"map_id": map_id})
 
 
 def embed_map(request, map_id):
+    # Embed code and preview
     return render(request, "event_map/embed.html", context={"map_id": map_id})
 
 
 def embed_text_only_map(request, map_id):
+    # Just the embed code (plain text)
     embed_code = render_to_string("event_map/embed_code.html",
                                   {"map_id": map_id, "request": request})
     return HttpResponse(embed_code, content_type='text/plain')

@@ -18,7 +18,7 @@ function makeMap(actions) {
 
   console.log(actionsData);
 
-  var actionsMap = L.map("Chaos-Map",{
+  var actionsMap = L.map("Chaos-Map-{{ map_id }}",{
                       center: [55.0006601,-2.7039512],
                       crs: L.CRS.EPSG3857,
                       zoom: 6,
