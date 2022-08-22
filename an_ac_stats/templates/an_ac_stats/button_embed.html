@@ -1,4 +1,23 @@
-<button onclick="madeCall(endpoint='{{ campaign.campaign_url }}/outreaches')">Made call</button>
+<div class="w-form">
+  <form id="mp-call-form" name="email-form" class="footer__form formsubmit" aria-label="Form" action='{{ campaign.campaign_url }}/outreaches'>
+    <div class="footer__forminput">
+      <label for="postcode" class="signupform__label">POSTCODE</label>
+      <input type="text" class="signupblock__input w-input" maxlength="256" name="postcode" placeholder="" id="postcode" required=""  onkeyup="postcodeEntered(this)">
+    </div>
+    <div class="footer__forminput">
+      <label for="mp_name" class="signupform__label">MP Name</label>
+      <input type="text" class="signupblock__input w-input mp-output" maxlength="256" name="mp_name" placeholder="" id="mp_name" disabled>
+    </div>
+    <input type="submit" value="Call Made" class="button yellowbackground w-button">
+  </form>
+  <div class="bodytext yellowbackground w-form-done" tabindex="-1" role="region" aria-label="Form success">
+    <div>Thank you! Your call has been registered.</div>
+  </div>
+  <div class="formsubtext redbackground w-form-fail" tabindex="-1" role="region" aria-label="Form failure">
+    <div>Oops! Something went wrong while submitting the form.</div>
+  </div>
+</div>
+
 <script type="text/javascript">
   function httpPostAsync(theUrl, data, callback) {
     let xmlHttpReq = new XMLHttpRequest();
@@ -6,25 +25,98 @@
       if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200)
         callback(xmlHttpReq.responseText);
     }
+    xmlHttpReq.onerror = function () {
+      callback('Error')
+    }
     xmlHttpReq.open("POST", theUrl, true); // true for asynchronous
     // set `Content-Type` header
     xmlHttpReq.setRequestHeader('Content-Type', 'application/json');
     xmlHttpReq.send(JSON.stringify(data));
   }
+  function httpGetAsync(theUrl, callback) {
+    let xmlHttpReq = new XMLHttpRequest();
+    xmlHttpReq.onreadystatechange = function () {
+      if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200)
+        callback(xmlHttpReq.responseText);
+    }
+    xmlHttpReq.open("GET", theUrl, true); // true for asynchronous
+    xmlHttpReq.send(null);
+  }
+  function callFormSubmit(event){
+    event.preventDefault();
+    const formInstance = event.target;
+    const formParent = formInstance.parentNode;
+    const sucessBox = formParent.getElementsByClassName("w-form-done")[0];
+    const errorBox = formParent.getElementsByClassName("w-form-fail")[0];
+    madeCall(
+      formInstance.getAttribute('action'), 
+      target=formInstance.getElementsByClassName('mp-output')[0].value,
+      email="anon", 
+      function(res){
+        if (res == "Error"){
+          errorBox.style.display = "block";
+        }else{
+          sucessBox.style.display = "block"; 
+          formInstance.reset() 
+        }
+    })
+  }
   function madeCall(endpoint,
-                    target='{% if request.GET.target %}{{request.GET.target}}{% else %}BEIS Department{% endif %}',
-                    email='anonymous'){
+    target = '{% if request.GET.target %}{{request.GET.target}}{% else %}BEIS Department{% endif %}',
+    email = 'anonymous', callback) {
     console.log("button pressed")
     data = {
       "targets": [
-        {"given_name": target}
+        { "given_name": target }
       ],
       "person": {
-        "email_addresses": [ { "address": email} ]
+        "email_addresses": [{ "address": email }]
       }
     }
-    httpPostAsync(endpoint, data, function(res){
+    httpPostAsync(endpoint, data, function (res) {
       console.log(res)
+      callback(res)
     })
   }
+  function postcodeEntered(e) {
+    getMP(e.value, function (mp) {
+      let parent = e.parentNode.parentNode
+      let output = parent.getElementsByClassName('mp-output')[0]
+      output.value = mp
+    })
+  }
+  function getMP(postcodeQuery, callback) {
+    if (postcodeQuery.length == 0) {
+      return
+    }
+    getPostcode(postcodeQuery, function (postcode) {
+      if (!postcode) {
+        callback('')
+      }
+      if (postcode.length == 0) {
+        callback('')
+      }
+      let constit = postcode[0]['parliamentary_constituency']
+      getConstit(constit, function (data) {
+        if (data.length == 0) {
+          callback('')
+        }
+        callback(data[0].value.currentRepresentation.member.value.nameDisplayAs)
+      })
+    })
+  }
+  function getConstit(searchText, callback) {
+    let baseUrl = 'https://members-api.parliament.uk/api/Location/Constituency/Search'
+    httpGetAsync(encodeURI(`${baseUrl}?searchText=${searchText}&skip=0&take=1`), function (res) {
+      callback(JSON.parse(res)['items'])
+    })
+  }
+  function getPostcode(searchText, callback) {
+    let baseUrl = 'https://api.postcodes.io/postcodes'
+    httpGetAsync(encodeURI(`${baseUrl}?q=${searchText}&limit=1`), function (res) {
+      callback(JSON.parse(res)['result'])
+    })
+  }
+  var mpCallForm = document.getElementById('mp-call-form')
+  mpCallForm.addEventListener('submit', callFormSubmit)
 </script>
