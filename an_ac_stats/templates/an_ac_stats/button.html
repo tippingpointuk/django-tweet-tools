@@ -1,6 +1,18 @@
-{% include "./button_embed.html" %}
-<pre>
-  {% filter force_escape %}
+<html>
+  <head>
+    <title>{{ campaign.name }}</title>
+  </head>
+  <body>
+    <h1>{{ campaign.name }}</h1>
+    <hr>
+    <hr>
     {% include "./button_embed.html" %}
-  {% endfilter %}
-</pre>
+    <hr>
+    <pre>
+      {% filter force_escape %}
+        {% include "./button_embed.html" %}
+      {% endfilter %}
+    </pre>
+  </body>
+</html>
+
