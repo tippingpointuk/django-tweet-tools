@@ -93,8 +93,10 @@ def get_tweet_data(request, config_id):
         targets = [r['fields']
                    for r in target_table if 'Twitter' in r['fields'].keys()]
     else:
-        targets = json.loads(request.POST.get('targets')
-                             or request.GET.get('targets'))
+        targets_q = request.POST.get('targets') or request.GET.get('targets')
+        if not targets_q:
+            return {}
+        targets = json.loads(targets_q)
     # Get tweets
     tweets_at = airtable.Airtable(
         config.tweets_base, environ.get(config.api_key_name))
