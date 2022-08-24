@@ -6,5 +6,16 @@
   </head>
   <body>
     <h1>Refreshed {{name}}</h1>
+    <ul>
+      <li>{{airtable_events}} synced from Airtable.</li>
+      <li>
+        Synced from Action Network:
+        <ul>
+          {% for k,v in an_events.items %}
+          <li>{{k}}: {{ v }}</li>
+          {% endfor %}
+        </ul>
+      </li>
+    </ul>
   </body>
 </html>

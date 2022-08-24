@@ -4,6 +4,7 @@
   <head>
     <meta charset="utf-8">
     <title>{{ event.title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{% static 'event_map/css/MarkerCluster.Default.css' %}">
     <link rel="stylesheet" href="{% static 'event_map/css/MarkerCluster.css' %}">
     <link rel="stylesheet" href="{% static 'event_map/css/map.css' %}">
@@ -15,7 +16,7 @@
   </head>
   <body>
     <div class="Chaos-Map-Container">
-      <div id="Chaos-Map"></div>
+      <div id="Chaos-Map-{{ map_id }}" class="Chaos-Map"></div>
       <div class="Chaos-Map-Overlay">
         <!-- <div class="Action">
 

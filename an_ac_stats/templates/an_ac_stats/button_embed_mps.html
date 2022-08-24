@@ -1,0 +1,235 @@
+<div class="mp-calling-form-container">
+  <div class="mp-profile-container">
+    <div class="mp-profile">
+      <div class="mp-photo"></div>
+      <a href="" class="mp-name-link" target="_blank"><h2 class="mp-name">Your MP</h2></a>
+      <p><span class="mp-party"></span></p>
+      <p>&#128222; <span class="mp-phone">enter your postcode</span></p>
+    </div>
+  </div>
+  <div class="w-form mp-calling-form">
+    <form id="mp-call-form" name="email-form" class="footer__form formsubmit" aria-label="Form" action='{{ campaign.campaign_url }}/outreaches'>
+      <div class="footer__forminput">
+        <label for="postcode" class="signupform__label">POSTCODE</label>
+        <input type="text" class="signupblock__input w-input" maxlength="256" name="postcode" placeholder="" id="postcode" required=""  onkeyup="postcodeEntered(this)">
+      </div>
+      <div class="mp-data-results-box"  style="display: none;"><p>Your MP is <span class="mp-output-name"></span> and their number is <span class="mp-output-phone"><a href=""></a></span></p></div>
+      <div class="footer__forminput">
+        <label for="email" class="signupform__label">EMAIL (optional)</label>
+        <input type="text" class="signupblock__input w-input email-input-mp-form" maxlength="256" name="email" placeholder="" id="email">
+      </div>
+      <input type="submit" value="Call Made" class="button yellowbackground w-button">
+    </form>
+    <div class="bodytext yellowbackground w-form-done" tabindex="-1" role="region" aria-label="Form success">
+      <div>Thank you! Your call has been registered. If you have time, send them a follow up email using the <a href="#woa-email-mp">tool</a> Thank you! Your call has been registered. If you have time, send them a follow up email using the <a href="https://airtable.com/shrfTDj7klCBzBGoY" target="_blank ">register their response</a>.
+      </div>
+    </div>
+    <div class="formsubtext redbackground w-form-fail" tabindex="-1" role="region" aria-label="Form failure">
+      <div>Oops! Something went wrong while submitting the form.</div>
+    </div>
+  </div>
+  
+</div>
+<style>
+  .mp-calling-form-container{
+    display: flex;
+    flex-wrap: wrap;
+    
+  }
+  .mp-calling-form-container > *  {
+    flex-basis: 50%;
+  }
+  .mp-profile-container  .mp-photo {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: black center center no-repeat;
+    background-size: cover;
+    margin: 0 auto;
+    border: white 3px solid;
+  }
+  .mp-profile-container  .mp-profile {
+    margin: 10px auto;
+    max-width: 250px;
+    border-radius: 5px;
+    box-shadow: grey 0 0 5px;
+    text-align: center;
+    padding: 10px;
+  }
+  .mp-profile-container  .mp-party {
+    padding: 0.2em 0.7em;
+    border-radius: 1em;
+    text-transform: uppercase;
+    font-family: 'Courier New', Courier, monospace;
+  }
+</style>
+
+
+<script type="text/javascript">
+  const TITLES = [
+      "Mr",
+      "Ms",
+      "Mx",
+      "Sir",
+      "Dame",
+      "Mrs",
+      "Dr",
+      "Miss"
+  ]
+  function httpPostAsync(theUrl, data, callback) {
+    let xmlHttpReq = new XMLHttpRequest();
+    xmlHttpReq.onreadystatechange = function () {
+      if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200)
+        callback(xmlHttpReq.responseText);
+    }
+    xmlHttpReq.onerror = function () {
+      callback('Error')
+    }
+    xmlHttpReq.open("POST", theUrl, true); // true for asynchronous
+    // set `Content-Type` header
+    xmlHttpReq.setRequestHeader('Content-Type', 'application/json');
+    xmlHttpReq.send(JSON.stringify(data));
+  }
+  function httpGetAsync(theUrl, callback) {
+    let xmlHttpReq = new XMLHttpRequest();
+    xmlHttpReq.onreadystatechange = function () {
+      if (xmlHttpReq.readyState == 4 && xmlHttpReq.status == 200)
+        callback(xmlHttpReq.responseText);
+    }
+    xmlHttpReq.open("GET", theUrl, true); // true for asynchronous
+    xmlHttpReq.send(null);
+  }
+  function callFormSubmit(event){
+    event.preventDefault();
+    const formInstance = event.target;
+    const formParent = formInstance.parentNode.parentNode;
+    const sucessBox = formParent.getElementsByClassName("w-form-done")[0];
+    const errorBox = formParent.getElementsByClassName("w-form-fail")[0];
+    let email = formInstance.getElementsByClassName('email-input-mp-form')[0].value;
+    if (!email || email == ''){
+      email = "anon";
+    }
+    madeCall(
+      formInstance.getAttribute('action'), 
+      target=formParent.getElementsByClassName('mp-name')[0].innerHTML,
+      email=email, 
+      function(res){
+        if (res == "Error"){
+          errorBox.style.display = "block";
+        }else{
+          sucessBox.style.display = "block"; 
+          formInstance.reset() 
+        }
+    })
+  }
+  function madeCall(endpoint,
+    target = '{% if request.GET.target %}{{request.GET.target}}{% else %}BEIS Department{% endif %}',
+    email = 'anonymous', callback) {
+    console.log("button pressed")
+    data = {
+      "targets": [
+        { "given_name": target }
+      ],
+      "person": {
+        "email_addresses": [{ "address": email }]
+      }
+    }
+    httpPostAsync(endpoint, data, function (res) {
+      console.log(res)
+      callback(res)
+    })
+  }
+  function stripTitles(mpName){
+    let mpNameOut = mpName;
+    for (title of TITLES){
+      mpNameOut = mpNameOut.replace(title+' ', '');
+    }
+    return mpNameOut
+  }
+  function postcodeEntered(e) {
+    getMP(e.value, function (mp) {
+      let mpProfile = document.getElementsByClassName('mp-profile-container')[0]
+      if (!mp){
+        return
+      }
+      // Get MP Elements
+      let mpName = mpProfile.getElementsByClassName('mp-name')[0];
+      let mpPhoto = mpProfile.getElementsByClassName('mp-photo')[0];
+      let mpParty = mpProfile.getElementsByClassName('mp-party')[0];
+      let mpNameLink = mpProfile.getElementsByClassName('mp-name-link')[0];
+      // Update name
+      mpName.innerHTML = stripTitles(mp.nameDisplayAs)
+      mpNameLink.setAttribute('href', `https://members.parliament.uk/member/${mp.id}/contact`)
+      // Change photo
+      mpPhoto.style['background-image'] = `url('https://members-api.parliament.uk/api/Members/${mp.id}/Thumbnail')`
+      mpPhoto.style.borderColor = `#${mp.latestParty.backgroundColour}`
+      // Add party
+      mpParty.innerHTML = mp.latestParty.name;
+      mpParty.style.backgroundColor = `#${mp.latestParty.backgroundColour}`;
+      mpParty.style.color = `#${mp.latestParty.foregroundColour}`;
+      getMPPhone(mp.id, function(phoneNumber){
+        let mpPhone = mpProfile.getElementsByClassName('mp-phone')[0];
+        // console.log(phoneNumber)
+        mpPhone.innerHTML = `<a href='tel:${phoneNumber}'>${phoneNumber}</a>`;
+      })
+    })
+  }
+  function getMP(postcodeQuery, callback) {
+    if (postcodeQuery.length == 0) {
+      return
+    }
+    getPostcode(postcodeQuery, function (postcode) {
+      if (postcode == null) {
+        callback(null)
+        return
+      }else if (postcode.length == 0) {
+        callback(null)
+        return
+      }
+      let constit = postcode[0]['parliamentary_constituency']
+      getConstit(constit, function (data) {
+        if (data.length == 0) {
+          callback(null)
+        }
+        callback(data[0].value.currentRepresentation.member.value)
+      })
+    })
+  }
+  function getMPContacts(mpId, callback){
+    let url = `https://members-api.parliament.uk/api/Members/${mpId}/Contact`
+    httpGetAsync(url, function (res) {
+      let contact_data = JSON.parse(res)['value'];
+      let contacts = {};
+      for (contact of contact_data){
+        contacts[contact['type']] = contact;
+      }
+      callback(contacts)
+    })
+  }
+  function getMPPhone(mpId, callback){
+    getMPContacts(mpId, function(contacts){
+      const types = ['Constituency', 'Parliamentary', 'Party']
+      for (type of types){
+        if (Object.keys(contacts).includes(type)){
+          if(contacts[type].phone){
+            callback(contacts[type].phone)
+          }
+        }
+      }
+    })
+  }
+  function getConstit(searchText, callback) {
+    let baseUrl = 'https://members-api.parliament.uk/api/Location/Constituency/Search'
+    httpGetAsync(encodeURI(`${baseUrl}?searchText=${searchText}&skip=0&take=1`), function (res) {
+      callback(JSON.parse(res)['items'])
+    })
+  }
+  function getPostcode(searchText, callback) {
+    let baseUrl = 'https://api.postcodes.io/postcodes'
+    httpGetAsync(encodeURI(`${baseUrl}?q=${searchText}&limit=1`), function (res) {
+      callback(JSON.parse(res)['result'])
+    })
+  }
+  var mpCallForm = document.getElementById('mp-call-form')
+  mpCallForm.addEventListener('submit', callFormSubmit)
+</script>

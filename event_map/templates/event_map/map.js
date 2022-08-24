@@ -18,7 +18,7 @@ function makeMap(actions) {
 
   console.log(actionsData);
 
-  var actionsMap = L.map("Chaos-Map",{
+  var actionsMap = L.map("Chaos-Map-{{ map_id }}",{
                       center: [55.0006601,-2.7039512],
                       crs: L.CRS.EPSG3857,
                       zoom: 6,
@@ -66,8 +66,7 @@ function makeMap(actions) {
     action = actions[i]
     startDate = new Date(action["start_date"])
     // var markerLocation = action;
-    if (action['map_exclude']){
-      console.log(`No location for ${action['title']}`)
+    if (action['map_exclude'] || action['online']){
       continue
     }
     var newMarker = L.marker([action["latitude"], action["longitude"]],{icon: redMarker});
@@ -116,11 +115,13 @@ function updateActionsList(actions){
   for (i in actions){
     let action = actions[i];
     var id = action["id"];
-    // var start = new Date(actions[i]["start_date"]+" UTC+0100");
-    // var options = { hour: 'numeric', minute: 'numeric'}
-    // var startTime = start.getTime() ? new Intl.DateTimeFormat('en-GB', options).format(start) : "";
-    // var options = { weekday: 'short', month: 'short', day: 'numeric'}
-    // var startDate = start.getTime() ? new Intl.DateTimeFormat('en-GB', options).format(start) : "";
+    console.log(action["start_date"])
+    var start = new Date(action["start_date"].replace("Z", "+0100"));
+    console.log(start);
+    var options = { hour: 'numeric', minute: 'numeric'}
+    var startTime = start.getTime() ? new Intl.DateTimeFormat('en-GB', options).format(start) : "";
+    var options = { weekday: 'short', month: 'short', day: 'numeric'}
+    var startDate = start.getTime() ? new Intl.DateTimeFormat('en-GB', options).format(start) : "";
     actionslisthtml = actionslisthtml.concat(/*html*/`
       <div class="Chaos-Blog-Item Action"  id="${ id }">
         <div class="top">
@@ -129,7 +130,7 @@ function updateActionsList(actions){
               <h3><a target="_blank" href="${action["browser_url"]}">${ action["title"] }</a></h3>
               <a target="_blank" href="${action["browser_url"]}"><span class="Chaos-Button">Join</span></a>
             </div>
-            <p><time>${ action.start_date  }</time> on ${ action.end_date }</p>
+            <p><time>${ startTime  }</time> on ${ startDate }</p>
             <address>${action['address'] }</address>
           </div>
         </div>

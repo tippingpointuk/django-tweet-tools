@@ -1,7 +1,7 @@
 .Chaos-Map-Container {
 	 display: flex;
 }
- .Chaos-Map-Container #Chaos-Map {
+ .Chaos-Map-Container > .Chaos-Map {
 	 position: absolute;
 	 width: 100vw;
 	 height: 100vh;
@@ -46,6 +46,17 @@
  @media screen and (min-width: 900px) {
 	 .Chaos-Map-Container .Chaos-Map-Overlay .Action-List .Action {
 		 flex-basis: auto;
+	}
+}
+@media screen and (max-width: 450px) {
+	
+}
+@media screen and ((max-height: 600px) or (max-width: 450px)) {
+	.Chaos-Map-Container .Chaos-Map-Overlay .header-line > a {
+		display: none;
+	}	
+	.Chaos-Map-Container .Chaos-Map-Overlay .Chaos-Blog-Item .top .description {
+		font-size: 0.6em;
 	}
 }
  #map {
