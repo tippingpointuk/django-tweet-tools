@@ -22,7 +22,14 @@ def update_records(campaign):
     }
     if environ.get(campaign.key):
         headers['OSDI-API-Token'] = environ[campaign.key]
-    url = campaign.campaign_url+"/outreaches"
+    if 'advocacy_campaigns' in campaign.campaign_url:
+        url = campaign.campaign_url+"/outreaches"
+    elif 'petitions' in campaign.campaign_url:
+        url = campaign.campaign_url+"/signatures"
+    elif 'forms' in campaign.campaign_url:
+        url = campaign.campaign_url+"/submissions"
+    elif 'fundraising_pages' in campaign.campaign_url:
+        url = campaign.campaign_url+"/donations"
     res = requests.get(url, headers=headers)
     if 200 > res.status_code > 299:
         return
