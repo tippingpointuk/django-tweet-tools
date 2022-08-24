@@ -60,6 +60,16 @@
 
 
 <script type="text/javascript">
+  const TITLES = [
+      "Mr",
+      "Ms",
+      "Mx",
+      "Sir",
+      "Dame",
+      "Mrs",
+      "Dr",
+      "Miss"
+  ]
   function httpPostAsync(theUrl, data, callback) {
     let xmlHttpReq = new XMLHttpRequest();
     xmlHttpReq.onreadystatechange = function () {
@@ -123,6 +133,13 @@
       callback(res)
     })
   }
+  function stripTitles(mpName){
+    let mpNameOut = mpName;
+    for (title of TITLES){
+      mpNameOut = mpNameOut.replace(title+' ', '');
+    }
+    return mpNameOut
+  }
   function postcodeEntered(e) {
     getMP(e.value, function (mp) {
       let mpProfile = document.getElementsByClassName('mp-profile-container')[0]
@@ -130,8 +147,8 @@
         return
       }
       let mpName = mpProfile.getElementsByClassName('mp-name')[0];
-      let mpPhoto = mpProfile.getElementsByClassName('mp-photo')[0];
-      mpName.innerHTML = mp.nameDisplayAs
+      let mpPhoto = mpProfile.getElementsByClassName('mp-photo')[0];      
+      mpName.innerHTML = stripTitles(mp.nameDisplayAs)
       mpPhoto.style['background-image'] = `url('https://members-api.parliament.uk/api/Members/${mp.id}/Thumbnail')`
       getMPPhone(mp.id, function(phoneNumber){
         let mpPhone = mpProfile.getElementsByClassName('mp-phone')[0];
