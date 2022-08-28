@@ -94,14 +94,20 @@ def get_tweet_data(request, config_id):
                    for r in target_table if 'Twitter' in r['fields'].keys()]
     else:
         targets_q = request.POST.get('targets') or request.GET.get('targets')
-        if not targets_q:
-            return {}
-        targets = json.loads(targets_q)
-    # Get tweets
-    tweets_at = airtable.Airtable(
-        config.tweets_base, environ.get(config.api_key_name))
-    tweet_table = tweets_at.iterate(config.tweets_table, view=view['tweets'])
-    tweets = [{'tweet': r['fields']['Text']} for r in tweet_table]
+        if targets_q:
+            targets = json.loads(targets_q)
+        else:
+            targets = []
+    if view['tweets']:
+        # Get tweets
+        tweets_at = airtable.Airtable(
+            config.tweets_base, environ.get(config.api_key_name))
+        tweet_table = tweets_at.iterate(config.tweets_table, view=view['tweets'])
+        tweets = [{'tweet': r['fields']['Text']} for r in tweet_table]
+    else:
+        tweet_list = json.loads(str(request.POST.get('tweet_list') or request.GET.get('tweet_list')))
+        tweets = [{'tweet': t}  for t in tweet_list]
+    print(tweets)
     # Randomise tweets
     random.shuffle(tweets)
 
@@ -109,6 +115,7 @@ def get_tweet_data(request, config_id):
 
     # Pick up to max number of tweets and process with random target
     for tweet in tweets[0:max_tweets]:
+        print(tweet)
         if len(targets) > 1:
             target = targets[random.randrange(0, len(targets)-1)]
         elif len(targets) == 1:
