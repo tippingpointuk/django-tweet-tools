@@ -5,21 +5,33 @@ from django.utils import timezone
 from os import environ
 import requests
 
-from .models import Campaign
+from .models import Campaign, CampaignGroup
 
 
 def get_total_records(req, campaign_id):
     campaign = get_object_or_404(Campaign, pk=campaign_id)
+    output = {
+        'total_records': get_total_records_campaign(campaign)
+    }
+    return JsonResponse(output)
+
+def get_total_records_campaign(campaign):
     since_sync = timezone.now() - campaign.last_updated
-    output = {}
+    output = 0
     if since_sync.seconds > 30:
         update_records(campaign)
     if campaign.total_records < campaign.boost_count:
-        output['total_records'] = campaign.boost_count
+        output = campaign.boost_count
     else:
-        output['total_records'] = campaign.total_records
-    return JsonResponse(output)
+        output = campaign.total_records
+    return output
 
+def get_total_records_campaign_group(req, campaign_group_id):
+    campaign_group = get_object_or_404(CampaignGroup, pk=campaign_group_id)
+    output = {'total_records': 0}
+    for campaign in campaign_group.campaigns.all():
+        output['total_records'] += get_total_records_campaign(campaign)
+    return JsonResponse(output)
 
 def update_records(campaign):
     headers = {

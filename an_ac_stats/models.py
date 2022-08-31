@@ -11,3 +11,10 @@ class Campaign(models.Model):
 
     def __str__(self):
         return self.name
+
+class CampaignGroup(models.Model):
+    name = models.CharField(max_length=100)
+    campaigns = models.ManyToManyField(Campaign)
+
+    def __str__(self):
+        return self.name
